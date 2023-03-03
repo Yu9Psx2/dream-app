@@ -2,20 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { invokeLambdaFunction } from './lambdaFunctions';
 import { useCookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
-import mj from './mj.gif'
+import mj from './mj.gif';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Stack from 'react-bootstrap/Stack';
 import Navbar from 'react-bootstrap/Navbar';
-import './App.css'
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import './App.css';
 
 function App() {
   const [imageUrl, setImageUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
   const [cookies, setCookie] = useCookies(['id']);
   const oneDay = 60 * 60 * 24; // 1 day in seconds
-
 
   useEffect(() => {
     // Check if the cookie exists
@@ -30,10 +31,9 @@ function App() {
     }
   }, [cookies, setCookie]);
 
-
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-    setIsLoading(true)
+    setIsLoading(true);
     const passed_phrase = event.target.phrase.value;
     // const image = await getImageFromApi(phrase); // Your API implementation
     const payload = { phrase: passed_phrase };
@@ -42,41 +42,37 @@ function App() {
     const payloadObject = JSON.parse(lambdaResponse['Payload']);
     const returned_image = payloadObject['url'];
     setImageUrl(returned_image);
-    setIsLoading(false)
+    setIsLoading(false);
   };
 
   return (
     <>
-      <Stack className="vw-100 vh-100">
-        <Navbar bg="dark p-3">
-          <Navbar.Brand>Navbar</Navbar.Brand>
-        </Navbar>
-        <Stack className="flex-grow-1 d-flex justify-content-center bg-success p-3">
-          {isLoading ? (<>
-            <div>LOADING PLEASE WAIT
-            </div>
-            <div><img src={mj} alt="MJ" style={{ width: 250, height: 250 }} /></div>
-          </>) : imageUrl ? (
-            <div>
-              <img src={imageUrl} alt="searched" style={{ width: 250, height: 250 }} />
-            </div>
-          ) : null}
-
-          <div>This site uses cookies to track your progress.</div>
-          <div>
-            <form onSubmit={handleFormSubmit}>
-              <label>
-                Phrase:
-                <input type="text" name="phrase" size="20" />
-              </label>
-              <button type="submit">Submit</button>
-            </form>
-          </div>
+      <Container fluid className="min-vh-100 d-flex justify-content-center align-items-center">
+        <Stack gap={3} className="text-center d-flex justify-content-center">
+          {isLoading ? (
+            <>
+              <div className="text-center mx-auto"><img src={mj} alt="MJ" style={{ width: 250, height: 250 }} /></div>
+              <div>Loading, please wait...</div>
+            </>
+          ) : (
+            <>
+              {imageUrl && (
+                <div className="mx-auto"><img src={imageUrl} alt="searched" style={{ width: 250, height: 250 }} /></div>
+              )}
+            </>
+          )}
+          <Form onSubmit={handleFormSubmit}>
+            <Form.Group controlId="formBasicEmail">
+              <Form.Control type="text" name="phrase" placeholder="Enter phrase" />
+            </Form.Group>
+            <Button variant="primary" type="submit">
+              Submit
+            </Button>
+          </Form>
+          <div>* This site uses cookies to track your progress.</div>
         </Stack>
-        <div id="footer" className="bg-warning p-3">
-          Footer
-        </div>
-      </Stack>
+      </Container>
+
     </>
   );
 }
