@@ -54,8 +54,7 @@ function App() {
     setIsLoading(false);
   };
 
-  const handleChoiceSubmit = async (event, choiceIndex) => {
-    event.preventDefault();
+  const handleChoiceSubmit = async (choiceIndex) => {
     setIsLoading(true);
     const choice = choices[choiceIndex];
     const payload = { choice: choice };
