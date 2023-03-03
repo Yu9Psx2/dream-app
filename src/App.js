@@ -11,6 +11,8 @@ import Navbar from 'react-bootstrap/Navbar';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import './App.css';
+import mockApiResponse from './mockAPI.js';
+import mockApiResponse2 from './mockAPI2.js';
 
 function App() {
   const [story, setStory] = useState('');
@@ -18,6 +20,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [cookies, setCookie] = useCookies(['id']);
   const oneDay = 60 * 60 * 24; // 1 day in seconds
+  const [submitted, setSubmitted] = useState(false);
+
 
   useEffect(() => {
     // Check if the cookie exists
@@ -35,13 +39,16 @@ function App() {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     setIsLoading(true);
+    setSubmitted(true);
     const passed_phrase = event.target.phrase.value;
     const payload = { phrase: passed_phrase };
     const lambdaResponse = await invokeLambdaFunction('dream_get', payload);
 
     const payloadObject = JSON.parse(lambdaResponse['Payload']);
-    const returned_story = payloadObject['story'];
-    const returned_choices = payloadObject['choices'];
+    // const returned_story = payloadObject['story'];
+    // const returned_choices = payloadObject['choices'];
+    const returned_story = "This is the first part of the returned story"
+    const returned_choices = mockApiResponse
     setStory(returned_story);
     setChoices(returned_choices);
     setIsLoading(false);
@@ -55,8 +62,10 @@ function App() {
     const lambdaResponse = await invokeLambdaFunction('dream_get', payload);
 
     const payloadObject = JSON.parse(lambdaResponse['Payload']);
-    const returned_story = payloadObject['story'];
-    const returned_choices = payloadObject['choices'];
+    // const returned_story = payloadObject['story'];
+    // const returned_choices = payloadObject['choices'];
+    const returned_story = "This is the second part of the returned story"
+    const returned_choices = mockApiResponse2
     setStory(returned_story);
     setChoices(returned_choices);
     setIsLoading(false);
@@ -68,47 +77,37 @@ function App() {
         <Stack gap={3} className="text-center d-flex justify-content-center">
           {isLoading ? (
             <>
-              <div className="text-center mx-auto"><img src={mj} alt="MJ" style={{ width: 250, height: 250 }} /></div>
+              <div className="text-center mx-auto">
+                <img src={mj} alt="MJ" style={{ width: 250, height: 250 }} />
+              </div>
               <div>Loading, please wait...</div>
             </>
+          ) : submitted ? (
+            <div><p>{story}</p></div>
           ) : (
-            <>
-              <div>{story}</div>
-              {choices.map((choice, index) => (
-                <Form key={index} onSubmit={(event) => handleChoiceSubmit(event, index)}>
-                  <Form.Group controlId={`formBasicChoice${index}`}>
-                    <Form.Label>{choice.text}</Form.Label>
-                    <Form.Control type="text" name="choice" placeholder="Enter choice" />
-                  </Form.Group>
-                  <Button variant="primary" type="submit">
-                    Submit
-                  </Button>
-                </Form>
-              ))}
-            </>
+            <Form onSubmit={handleFormSubmit}>
+              <Form.Group controlId="formBasicEmail">
+                <Form.Control type="text" name="phrase" placeholder="Enter phrase" />
+              </Form.Group>
+              <Button variant="primary" type="submit">
+                Submit
+              </Button>
+            </Form>
           )}
-          <Form onSubmit={handleFormSubmit}>
-            <Form.Group controlId="formBasicEmail">
-              <Form.Control type="text" name="phrase" placeholder="Enter phrase" />
-            </Form.Group>
-            <Button variant="primary" type="submit">
-              Submit
-            </Button>
-          </Form>
           {story && (
-            <div>
-              <p>{story}</p>
-              {choices.map((imageUrl, index) => (
-                <div key={index}>
-                  <img src={imageUrl} alt={`image-${index}`} style={{ width: 250, height: 250 }} />
-                  <p>{imageUrl[index]}</p>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              {choices.map((choice, index) => (
+                <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <img src={choice.url} alt={`${index}`} style={{ width: 250, height: 250 }} />
+                  <p>{choice.text}</p>
                   <Button onClick={() => handleChoiceSubmit(index)}>Submit</Button>
                 </div>
               ))}
             </div>
           )}
-        
-      </Stack>
-    </Container></>)}
+        </Stack>
+      </Container>
+      </>)
+}
 
 export default App;
