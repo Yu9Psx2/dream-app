@@ -2,7 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { invokeLambdaFunction } from './lambdaFunctions';
 import { useCookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
-
+import mj from './mj.gif'
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Stack from 'react-bootstrap/Stack';
+import Navbar from 'react-bootstrap/Navbar';
+import './App.css'
 
 function App() {
   const [imageUrl, setImageUrl] = useState('');
@@ -41,24 +47,37 @@ function App() {
 
   return (
     <>
-    <div>This site uses cookies to track your progress.</div>
-    <div>
-      <form onSubmit={handleFormSubmit}>
-        <label>
-          Phrase:
-          <input type="text" name="phrase" />
-        </label>
-        <button type="submit">Submit</button>
-      </form>
-    </div>
-    {isLoading ? (
-        <div>Loading...</div>
-      ) : imageUrl ? (
-        <div>
-          <img src={imageUrl} alt="API Image" />
+      <Stack className="vw-100 vh-100">
+        <Navbar bg="dark p-3">
+          <Navbar.Brand>Navbar</Navbar.Brand>
+        </Navbar>
+        <Stack className="flex-grow-1 d-flex justify-content-center bg-success p-3">
+          {isLoading ? (<>
+            <div>LOADING PLEASE WAIT
+            </div>
+            <div><img src={mj} alt="MJ" style={{ width: 250, height: 250 }} /></div>
+          </>) : imageUrl ? (
+            <div>
+              <img src={imageUrl} alt="searched" style={{ width: 250, height: 250 }} />
+            </div>
+          ) : null}
+
+          <div>This site uses cookies to track your progress.</div>
+          <div>
+            <form onSubmit={handleFormSubmit}>
+              <label>
+                Phrase:
+                <input type="text" name="phrase" size="20" />
+              </label>
+              <button type="submit">Submit</button>
+            </form>
+          </div>
+        </Stack>
+        <div id="footer" className="bg-warning p-3">
+          Footer
         </div>
-      ) : null}
-  </>
+      </Stack>
+    </>
   );
 }
 
