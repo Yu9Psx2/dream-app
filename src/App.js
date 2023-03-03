@@ -13,7 +13,8 @@ import Button from 'react-bootstrap/Button';
 import './App.css';
 
 function App() {
-  const [imageUrl, setImageUrl] = useState('');
+  const [story, setStory] = useState('');
+  const [choices, setChoices] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [cookies, setCookie] = useCookies(['id']);
   const oneDay = 60 * 60 * 24; // 1 day in seconds
@@ -35,13 +36,29 @@ function App() {
     event.preventDefault();
     setIsLoading(true);
     const passed_phrase = event.target.phrase.value;
-    // const image = await getImageFromApi(phrase); // Your API implementation
     const payload = { phrase: passed_phrase };
     const lambdaResponse = await invokeLambdaFunction('dream_get', payload);
 
     const payloadObject = JSON.parse(lambdaResponse['Payload']);
-    const returned_image = payloadObject['url'];
-    setImageUrl(returned_image);
+    const returned_story = payloadObject['story'];
+    const returned_choices = payloadObject['choices'];
+    setStory(returned_story);
+    setChoices(returned_choices);
+    setIsLoading(false);
+  };
+
+  const handleChoiceSubmit = async (event, choiceIndex) => {
+    event.preventDefault();
+    setIsLoading(true);
+    const choice = choices[choiceIndex];
+    const payload = { choice: choice };
+    const lambdaResponse = await invokeLambdaFunction('dream_get', payload);
+
+    const payloadObject = JSON.parse(lambdaResponse['Payload']);
+    const returned_story = payloadObject['story'];
+    const returned_choices = payloadObject['choices'];
+    setStory(returned_story);
+    setChoices(returned_choices);
     setIsLoading(false);
   };
 
@@ -56,9 +73,18 @@ function App() {
             </>
           ) : (
             <>
-              {imageUrl && (
-                <div className="mx-auto"><img src={imageUrl} alt="searched" style={{ width: 250, height: 250 }} /></div>
-              )}
+              <div>{story}</div>
+              {choices.map((choice, index) => (
+                <Form key={index} onSubmit={(event) => handleChoiceSubmit(event, index)}>
+                  <Form.Group controlId={`formBasicChoice${index}`}>
+                    <Form.Label>{choice.text}</Form.Label>
+                    <Form.Control type="text" name="choice" placeholder="Enter choice" />
+                  </Form.Group>
+                  <Button variant="primary" type="submit">
+                    Submit
+                  </Button>
+                </Form>
+              ))}
             </>
           )}
           <Form onSubmit={handleFormSubmit}>
@@ -69,12 +95,20 @@ function App() {
               Submit
             </Button>
           </Form>
-          <div>* This site uses cookies to track your progress.</div>
-        </Stack>
-      </Container>
-
-    </>
-  );
-}
+          {story && (
+            <div>
+              <p>{story}</p>
+              {choices.map((imageUrl, index) => (
+                <div key={index}>
+                  <img src={imageUrl} alt={`image-${index}`} style={{ width: 250, height: 250 }} />
+                  <p>{imageUrl[index]}</p>
+                  <Button onClick={() => handleChoiceSubmit(index)}>Submit</Button>
+                </div>
+              ))}
+            </div>
+          )}
+        
+      </Stack>
+    </Container></>)}
 
 export default App;
