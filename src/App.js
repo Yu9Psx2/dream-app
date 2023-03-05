@@ -47,7 +47,7 @@ function App() {
     setGivenPhrase(passed_phrase)
     const payload = { phrase: passed_phrase };
     const lambdaResponse = await invokeLambdaFunction('dream_get', payload);
-   
+
     const payloadObject = JSON.parse(lambdaResponse['Payload']);
     setPayloadHolder(payloadObject)
     console.log(payloadObject)
@@ -65,12 +65,15 @@ function App() {
   const handleChoiceSubmit = async (choiceIndex) => {
     setIsLoading(true);
     const choice = choices[choiceIndex];
-    const payload = { phrase: given_phrase,
-      story: {returned_messages:payload_holder.story.returned_messages,
-      user_response:choice[0],
-      returned_good_flag: payload_holder.story.returned_good_flag,
-      returned_iterator:payload_holder.story.returned_iterator,
-     }};
+    const payload = {
+      phrase: given_phrase,
+      story: {
+        returned_messages: payload_holder.story.returned_messages,
+        user_response: choice[0],
+        returned_good_flag: payload_holder.story.returned_good_flag,
+        returned_iterator: payload_holder.story.returned_iterator,
+      }
+    };
     const lambdaResponse = await invokeLambdaFunction('dream_get', payload);
     const payloadObject = JSON.parse(lambdaResponse['Payload']);
     setPayloadHolder(payloadObject)
@@ -109,20 +112,22 @@ function App() {
             </Form>
           )}
           {story && (
-            <div style={{ display: "flex", justifyContent: "center" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
               {choices.map((choice, index) => (
-                <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "30%" }}>
                   <img src={choice.url} alt={`${index}`} style={{ width: 250, height: 250 }} />
-                  <p>{choice}</p>
-                  <Button onClick={() => handleChoiceSubmit(index)}>Submit</Button>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                    <p style={{ wordWrap: "break-word" }}>{choice}</p>
+                    <Button onClick={() => handleChoiceSubmit(index)}>Submit</Button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
-          {the_end ? (<><div>THE END</div></>): null}
+          {the_end ? (<><div>THE END</div></>) : null}
         </Stack>
       </Container>
-      </>)
+    </>)
 }
 
 export default App;
