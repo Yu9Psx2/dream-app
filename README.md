@@ -5,5 +5,3 @@ The purpose of this site is fourfold:
 4. To use ChatGPT to do that front end.
 
 Link to prompt: https://master.dtna3q8s2us1v.amplifyapp.com/
-
-Link with mock API result: https://my-feature-branch.dtna3q8s2us1v.amplifyapp.com/
