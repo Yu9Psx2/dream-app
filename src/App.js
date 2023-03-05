@@ -21,7 +21,10 @@ function App() {
   const [cookies, setCookie] = useCookies(['id']);
   const oneDay = 60 * 60 * 24; // 1 day in seconds
   const [submitted, setSubmitted] = useState(false);
-
+  const [payload_holder, setPayloadHolder] = useState(null)
+  const [given_phrase, setGivenPhrase] = useState(null)
+  const [image, setImage] = useState('')
+  const [the_end, setTheEnd] = useState(null)
 
   useEffect(() => {
     // Check if the cookie exists
@@ -41,14 +44,19 @@ function App() {
     setIsLoading(true);
     setSubmitted(true);
     const passed_phrase = event.target.phrase.value;
+    setGivenPhrase(passed_phrase)
     const payload = { phrase: passed_phrase };
     const lambdaResponse = await invokeLambdaFunction('dream_get', payload);
-
+   
     const payloadObject = JSON.parse(lambdaResponse['Payload']);
-    // const returned_story = payloadObject['story'];
-    // const returned_choices = payloadObject['choices'];
-    const returned_story = "This is the first part of the returned story"
-    const returned_choices = mockApiResponse
+    setPayloadHolder(payloadObject)
+    console.log(payloadObject)
+    const returned_story = payloadObject['story']['returned_messages'].slice(-1)[0].content;
+    console.log(payloadObject)
+    const returned_choices = payloadObject['story']['returned_options'];
+    const returned_image = payloadObject['url']
+    setImage(returned_image)
+    // const returned_choices = mockApiResponse
     setStory(returned_story);
     setChoices(returned_choices);
     setIsLoading(false);
@@ -57,14 +65,20 @@ function App() {
   const handleChoiceSubmit = async (choiceIndex) => {
     setIsLoading(true);
     const choice = choices[choiceIndex];
-    const payload = { choice: choice };
+    const payload = { phrase: given_phrase,
+      story: {returned_messages:payload_holder.story.returned_messages,
+      user_response:choice[0],
+      returned_good_flag: payload_holder.story.returned_good_flag,
+      returned_iterator:payload_holder.story.returned_iterator,
+     }};
     const lambdaResponse = await invokeLambdaFunction('dream_get', payload);
-
     const payloadObject = JSON.parse(lambdaResponse['Payload']);
-    // const returned_story = payloadObject['story'];
-    // const returned_choices = payloadObject['choices'];
-    const returned_story = "This is the second part of the returned story"
-    const returned_choices = mockApiResponse2
+    setPayloadHolder(payloadObject)
+    console.log(payloadObject)
+    const returned_story = payloadObject['story']['returned_messages'].slice(-1)[0].content;
+    const returned_choices = payloadObject['story']['returned_options'];
+    // const returned_choices = mockApiResponse2
+    setTheEnd(payloadObject['story']['returned_end_flag'])
     setStory(returned_story);
     setChoices(returned_choices);
     setIsLoading(false);
@@ -81,8 +95,9 @@ function App() {
               </div>
               <div>Loading, please wait...</div>
             </>
-          ) : submitted ? (
-            <div><p>{story}</p></div>
+          ) : submitted ? (<>
+            <div><img src={image} alt={`returned`} style={{ width: 250, height: 250 }} /></div>
+            <div><p>{story}</p></div></>
           ) : (
             <Form onSubmit={handleFormSubmit}>
               <Form.Group controlId="formBasicEmail">
@@ -98,12 +113,13 @@ function App() {
               {choices.map((choice, index) => (
                 <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                   <img src={choice.url} alt={`${index}`} style={{ width: 250, height: 250 }} />
-                  <p>{choice.text}</p>
+                  <p>{choice}</p>
                   <Button onClick={() => handleChoiceSubmit(index)}>Submit</Button>
                 </div>
               ))}
             </div>
           )}
+          {the_end ? (<><div>THE END</div></>): null}
         </Stack>
       </Container>
       </>)
