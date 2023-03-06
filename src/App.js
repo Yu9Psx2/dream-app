@@ -101,7 +101,8 @@ function App() {
           ) : submitted ? (<>
             <div><img src={image} alt={`returned`} style={{ width: 250, height: 250 }} /></div>
             <div><p>{story}</p></div></>
-          ) : (
+          ) : (<>
+            
             <Form onSubmit={handleFormSubmit}>
               <Form.Group controlId="formBasicEmail">
                 <Form.Control type="text" name="phrase" placeholder="Enter phrase" />
@@ -110,6 +111,9 @@ function App() {
                 Submit
               </Button>
             </Form>
+            <div>If the story options get grouped together in one button, please refresh and re-enter your prompt</div>
+            <div>The story that is generated can be unpredictable, use at your own risk.</div>
+            </>
           )}
           {story && (
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
