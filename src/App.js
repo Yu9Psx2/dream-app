@@ -123,7 +123,7 @@ function App() {
               <div>Loading, please wait...</div>
             </>
           ) : submitted ? (<>
-            <div><img src={image} alt={'returned'} style={{ width: 250, height: 250 }} /></div>
+            <div><img src={image.url} alt={'returned'} style={{ width: 768, height: 384 }} /></div>
             <div><p>{story}</p></div></>
           ) : (<>
 
