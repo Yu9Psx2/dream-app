@@ -25,6 +25,7 @@ function App() {
   const [given_phrase, setGivenPhrase] = useState(null)
   const [image, setImage] = useState('')
   const [the_end, setTheEnd] = useState(null)
+  const [countdownTime, setCountdownTime] = useState(20); // Countdown time in seconds
 
   useEffect(() => {
     // Check if the cookie exists
@@ -63,28 +64,42 @@ function App() {
   };
 
   const handleChoiceSubmit = async (choice) => {
-    setIsLoading(true);
-    const payload = {
-      phrase: given_phrase,
-      story: {
-        returned_messages: payload_holder.story.returned_messages,
-        user_response: choice,
-        returned_good_flag: payload_holder.story.returned_good_flag,
-        returned_iterator: payload_holder.story.returned_iterator,
-      }
-    };
-    const lambdaResponse = await invokeLambdaFunction('dream_test', payload);
-    const payloadObject = JSON.parse(lambdaResponse['Payload']);
-    setPayloadHolder(payloadObject)
-    console.log(payloadObject)
-    const returned_story = payloadObject['story']['returned_messages'].slice(-1)[0].content;
-    const returned_choices = payloadObject['story']['returned_options'];
-    // const returned_choices = mockApiResponse2
-    console.log(returned_choices)
-    setTheEnd(payloadObject['story']['returned_end_flag'])
-    setStory(returned_story);
-    setChoices(returned_choices);
-    setIsLoading(false);
+    // Check if countdownTime is zero or greater
+    if (countdownTime >= 0) {
+      setIsLoading(true);
+      // Start the countdown timer
+      const countdownInterval = setInterval(() => {
+        setCountdownTime((prevTime) => prevTime - 1);
+      }, 1000);
+      const payload = {
+        phrase: given_phrase,
+        story: {
+          returned_messages: payload_holder.story.returned_messages,
+          user_response: choice,
+          returned_good_flag: payload_holder.story.returned_good_flag,
+          returned_iterator: payload_holder.story.returned_iterator,
+        }
+      };
+      const lambdaResponse = await invokeLambdaFunction('dream_test', payload);
+
+
+
+
+      const payloadObject = JSON.parse(lambdaResponse['Payload']);
+      setPayloadHolder(payloadObject)
+      console.log(payloadObject)
+      const returned_story = payloadObject['story']['returned_messages'].slice(-1)[0].content;
+      const returned_choices = payloadObject['story']['returned_options'];
+      // const returned_choices = mockApiResponse2
+      console.log(returned_choices)
+      setTheEnd(payloadObject['story']['returned_end_flag'])
+      setStory(returned_story);
+      setChoices(returned_choices);
+      setIsLoading(false);
+      // Stop the countdown timer
+      clearInterval(countdownInterval);
+      setCountdownTime(20);
+    }
   };
 
   return (
@@ -112,7 +127,8 @@ function App() {
               </Button>
             </Form>
             <div>If the story options get grouped together in one button, please refresh and re-enter your prompt</div>
-            <div>The story that is generated can be unpredictable, use at ynpm sour own risk.</div>
+            <div>The story that is generated can be unpredictable, use at your own risk.</div>
+            <div>The API responses are slow, please wait 30 seconds for a response.</div>
           </>
           )}
           {story && (
@@ -142,14 +158,30 @@ function App() {
                     justifyContent: "center"
                   }}>
                     <p style={{ wordWrap: "break-word" }}>{choiceText}</p>
-                    <Button onClick={() => handleChoiceSubmit(choiceText)}>Submit</Button>
+                    <Button onClick={() => handleChoiceSubmit(choiceText)}>
+                      {countdownTime === 0 ? "Submit" : `Submit (${countdownTime}s)`}
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          {the_end ? (<><div>THE END</div></>) : null}
+          {the_end ? (<><div>THE END</div>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                padding: '10px',
+                borderRadius: '20px',
+                border: 'none',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+              }}
+            >Refresh the webpage</button>
+          </>) : null}
         </Stack>
       </Container>
     </>)
