@@ -65,10 +65,14 @@ function App() {
   };
 
   const handleChoiceSubmit = async (choice) => {
+    // Check if countdownTime is zero or greater
     if (countdownTime >= 0) {
       setIsLoading(true);
       setIsCooldown(true);
-
+      // Start the countdown timer
+      const countdownInterval = setInterval(() => {
+        setCountdownTime((prevTime) => prevTime - 1);
+      }, 1000);
       const payload = {
         phrase: given_phrase,
         story: {
@@ -78,38 +82,24 @@ function App() {
           returned_iterator: payload_holder.story.returned_iterator,
         }
       };
-
-      const countdownInterval = setInterval(() => {
-        setCountdownTime((prevTime) => prevTime - 1);
-      }, 1000);
-
-      const timer = setTimeout(async () => {
-        clearInterval(countdownInterval);
-        setCountdownTime(20);
-
-        const lambdaResponse = await invokeLambdaFunction('dream_test', payload);
-        const payloadObject = JSON.parse(lambdaResponse['Payload']);
-
-        setPayloadHolder(payloadObject)
-        console.log(payloadObject)
-        const returned_story = payloadObject['story']['returned_messages'].slice(-1)[0].content;
-        const returned_choices = payloadObject['story']['returned_options'];
-        console.log(returned_choices)
-        setTheEnd(payloadObject['story']['returned_end_flag'])
-        setStory(returned_story);
-        setChoices(returned_choices);
-        setIsLoading(false);
-        setIsCooldown(false);
-      }, countdownTime * 1000);
-
-      return () => {
-        clearTimeout(timer);
-        clearInterval(countdownInterval);
-        setCountdownTime(20);
-      };
+      const lambdaResponse = await invokeLambdaFunction('dream_test', payload);
+      const payloadObject = JSON.parse(lambdaResponse['Payload']);
+      setPayloadHolder(payloadObject)
+      console.log(payloadObject)
+      const returned_story = payloadObject['story']['returned_messages'].slice(-1)[0].content;
+      const returned_choices = payloadObject['story']['returned_options'];
+      console.log(returned_choices)
+      setTheEnd(payloadObject['story']['returned_end_flag'])
+      setStory(returned_story);
+      setChoices(returned_choices);
+      setIsLoading(false);
+      setIsCooldown(false);
+      // Stop the countdown timer
+      clearInterval(countdownInterval);
+      setCountdownTime(20);
     }
-  };
-
+  }
+    ;
 
   return (
     <>
@@ -167,20 +157,17 @@ function App() {
                     justifyContent: "center"
                   }}>
                     <p style={{ wordWrap: "break-word" }}>{choiceText}</p>
-                    <Button
-                      onClick={() => handleChoiceSubmit(choiceText)}
-                      disabled={isCooldown}
-                    >
-                      {isCooldown
-                        ? `On-cooldown, submitting in ${countdownTime}s`
-                        : countdownTime === 0
-                          ? "Submit"
-                          : `Submit (${countdownTime}s)`
-                      }
-                    </Button>
+                    {isCooldown ? (
+                      <Button disabled>
+                        On-cooldown, submitting in {countdownTime}s
+                      </Button>
+                    ) : (
+                      <Button onClick={() => handleChoiceSubmit(choiceText)}>
+                        {countdownTime === 0 ? "Submit" : `Submit (${countdownTime}s)`}
+                      </Button>
+                    )}
                   </div>
                 </div>
-
               ))}
             </div>
           )}
