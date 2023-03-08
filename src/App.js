@@ -86,7 +86,7 @@ function App() {
       const timer = setTimeout(async () => {
         clearInterval(countdownInterval);
         setCountdownTime(20);
-
+        console.log("submitting request")
         const lambdaResponse = await invokeLambdaFunction('dream_test', payload);
         const payloadObject = JSON.parse(lambdaResponse['Payload']);
 
