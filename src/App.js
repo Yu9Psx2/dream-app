@@ -27,6 +27,7 @@ function App() {
   const [the_end, setTheEnd] = useState(null)
   const [countdownTime, setCountdownTime] = useState(20); // Countdown time in seconds
   const [isCooldown, setIsCooldown] = useState(false);
+  const [submitted_choice, setSubmittedChoice] = useState(false)
 
   useEffect(() => {
     // Check if the cookie exists
@@ -87,6 +88,7 @@ function App() {
         clearInterval(countdownInterval);
         setCountdownTime(20);
         console.log("submitting request")
+        setSubmittedChoice(true)
         const lambdaResponse = await invokeLambdaFunction('dream_test', payload);
         const payloadObject = JSON.parse(lambdaResponse['Payload']);
 
@@ -100,6 +102,7 @@ function App() {
         setChoices(returned_choices);
         setIsLoading(false);
         setIsCooldown(false);
+        setSubmittedChoice(false)
       }, countdownTime * 1000);
 
       return () => {
@@ -169,13 +172,13 @@ function App() {
                     <p style={{ wordWrap: "break-word" }}>{choiceText}</p>
                     <Button
                       onClick={() => handleChoiceSubmit(choiceText)}
-                      disabled={isCooldown}
+                      disabled={isCooldown || submitted_choice}
                     >
-                      {isCooldown
-                        ? `On-cooldown, submitting in ${countdownTime}s`
-                        : countdownTime === 0
-                          ? "Submit"
-                          : `Submit (${countdownTime}s)`
+                      {submitted_choice
+                        ? "Request submitted"
+                        : isCooldown
+                          ? `On-cooldown, submitting in ${countdownTime}s`
+                          : "Submit"
                       }
                     </Button>
                   </div>
