@@ -4,4 +4,4 @@ The purpose of this site is fourfold:
 3. To learn a little bit about front end development
 4. To use ChatGPT to do that front end.
 
-Link to prompt: https://master.dtna3q8s2us1v.amplifyapp.com/
+Link to prompt: https://second-feature.dtna3q8s2us1v.amplifyapp.com/
