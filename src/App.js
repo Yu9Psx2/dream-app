@@ -65,6 +65,14 @@ function App() {
     setIsLoading(false);
   };
 
+  const handleButtonClick = (phrase) => {
+    const event = {
+      preventDefault: () => { },
+      target: { phrase: { value: phrase } },
+    };
+    handleFormSubmit(event);
+  };
+
   const handleChoiceSubmit = async (choice) => {
     if (countdownTime >= 0) {
       setIsLoading(true);
@@ -105,6 +113,7 @@ function App() {
         setSubmittedChoice(false)
       }, countdownTime * 1000);
 
+
       return () => {
         clearTimeout(timer);
         clearInterval(countdownInterval);
@@ -135,12 +144,55 @@ function App() {
                 <Form.Control type="text" name="phrase" placeholder="Enter phrase" />
               </Form.Group>
               <Button variant="primary" type="submit">
-                Submit
+                Submit your phrase!
               </Button>
             </Form>
-            <div>If the story options get grouped together in one button, please refresh and re-enter your prompt</div>
-            <div>The story that is generated can be unpredictable, use at your own risk.</div>
-            <div>The API responses are slow, please wait 30 seconds for a response.</div>
+            <p style={{ fontSize: '1.5rem' }}>Or choose one of our selected prompts:</p>
+            <Row>
+              {[
+                "A day in the life of a roof shingle",
+                "A day in the life of an accountant at a fortune 500 company",
+                "A day in the life of a giraffe at a zoo",
+                "A day at the museum",
+              ].map((phrase) => (
+                <Col xs={6} md={3} key={phrase} className="mb-2">
+                  <Button
+                    onClick={() => handleButtonClick(phrase)}
+                    style={{
+                      width: "100%",
+                      whiteSpace: "normal",
+                      textAlign: "center",
+                      wordWrap: "break-word",
+                    }}
+                  >
+                    {phrase}
+                  </Button>
+                </Col>
+              ))}
+            </Row>
+            <Row>
+              {[
+                "A day in the life of a French Bulldog",
+                "A day in the life of a Shiba Inu",
+                "A day in the life of a golden retriever",
+                "A day in the life of a bullmastiff",
+              ].map((phrase) => (
+                <Col xs={6} md={3} key={phrase}>
+                  <Button
+                    onClick={() => handleButtonClick(phrase)}
+                    style={{
+                      width: "100%",
+                      whiteSpace: "normal",
+                      textAlign: "center",
+                      wordWrap: "break-word",
+                    }}
+                  >
+                    {phrase}
+                  </Button>
+                </Col>
+              ))}
+            </Row>
+
           </>
           )}
           {story && (
@@ -204,6 +256,25 @@ function App() {
             >Refresh the webpage</button>
           </>) : null}
         </Stack>
+        <div
+          style={{
+            position: "absolute",
+            bottom: "5rem",
+            textAlign: "center",
+            width: "100%",
+          }}
+        >
+          <div>
+            If the story options get grouped together in one button, please refresh and
+            re-enter your prompt
+          </div>
+          <div>
+            The story that is generated can be unpredictable, use at your own risk.
+          </div>
+          <div>
+            The API responses are slow, please wait at least 30 seconds for a response.
+          </div>
+        </div>
       </Container>
     </>)
 }
