@@ -256,25 +256,27 @@ function App() {
             >Refresh the webpage</button>
           </>) : null}
         </Stack>
-        <div
-          style={{
-            position: "absolute",
-            bottom: "5rem",
-            textAlign: "center",
-            width: "100%",
-          }}
-        >
-          <div>
-            If the story options get grouped together in one button, please refresh and
-            re-enter your prompt
+        {!submitted && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "5rem",
+              textAlign: "center",
+              width: "100%",
+            }}
+          >
+            <div>
+              If the story options get grouped together in one button, please refresh and
+              re-enter your prompt
+            </div>
+            <div>
+              The story that is generated can be unpredictable, use at your own risk.
+            </div>
+            <div>
+              The API responses are slow, please wait at least 30 seconds for a response.
+            </div>
           </div>
-          <div>
-            The story that is generated can be unpredictable, use at your own risk.
-          </div>
-          <div>
-            The API responses are slow, please wait at least 30 seconds for a response.
-          </div>
-        </div>
+        )}
       </Container>
     </>)
 }
