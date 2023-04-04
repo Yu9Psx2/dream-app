@@ -25,7 +25,7 @@ function App() {
   const [given_phrase, setGivenPhrase] = useState(null)
   const [image, setImage] = useState('')
   const [the_end, setTheEnd] = useState(null)
-  const [countdownTime, setCountdownTime] = useState(20); // Countdown time in seconds
+  const [countdownTime, setCountdownTime] = useState(2); // Countdown time in seconds
   const [isCooldown, setIsCooldown] = useState(false);
   const [submitted_choice, setSubmittedChoice] = useState(false)
 
@@ -94,7 +94,7 @@ function App() {
 
       const timer = setTimeout(async () => {
         clearInterval(countdownInterval);
-        setCountdownTime(20);
+        setCountdownTime(2);
         console.log("submitting request")
         setSubmittedChoice(true)
         const lambdaResponse = await invokeLambdaFunction('dream_test', payload);
@@ -117,7 +117,7 @@ function App() {
       return () => {
         clearTimeout(timer);
         clearInterval(countdownInterval);
-        setCountdownTime(20);
+        setCountdownTime(2);
       };
     }
   };
