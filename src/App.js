@@ -3,6 +3,7 @@ import { invokeLambdaFunction } from './lambdaFunctions';
 import { useCookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import mj from './mj.gif';
+import bog from './bog.gif';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -28,6 +29,12 @@ function App() {
   const [countdownTime, setCountdownTime] = useState(2); // Countdown time in seconds
   const [isCooldown, setIsCooldown] = useState(false);
   const [submitted_choice, setSubmittedChoice] = useState(false)
+  const [chaosMode, setChaosMode] = useState(false);
+  const [chaosModeUsed, setChaosModeUsed] = useState(false);
+  const [chaosMarker, setChaosMarker] = useState(null);
+  const [backgroundImage, setBackgroundImage] = useState("");
+  const [images] = useState([mj, bog]);
+  const [randomImage, setRandomImage] = useState(images[Math.floor(Math.random() * images.length)]);
 
   useEffect(() => {
     // Check if the cookie exists
@@ -41,6 +48,24 @@ function App() {
       console.log('User ID:', userId);
     }
   }, [cookies, setCookie]);
+
+  useEffect(() => {
+    if (chaosMarker === " introduce a sharknado into the story") {
+      setBackgroundImage("https://picturebucket133234-dev.s3.amazonaws.com/shark.jpg");
+    } else if (chaosMarker === " introduce a bear into the story") {
+      setBackgroundImage("https://picturebucket133234-dev.s3.amazonaws.com/bear.jpg");
+    } else if (chaosMarker === " have the protagonists find gold in the story") {
+      setBackgroundImage("https://picturebucket133234-dev.s3.amazonaws.com/gold.jpg");
+    } else {
+      setBackgroundImage("");
+    }
+  }, [chaosMarker]);
+  
+
+
+  const handleChaosModeChange = (e) => {
+    setChaosMode(e.target.checked);
+  };
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
@@ -74,6 +99,7 @@ function App() {
   };
 
   const handleChoiceSubmit = async (choice) => {
+    setRandomImage(images[Math.floor(Math.random() * images.length)])
     if (countdownTime >= 0) {
       setIsLoading(true);
       setIsCooldown(true);
@@ -85,8 +111,15 @@ function App() {
           user_response: choice,
           returned_good_flag: payload_holder.story.returned_good_flag,
           returned_iterator: payload_holder.story.returned_iterator,
-        }
+        },
+        chaos_mode: chaosMode, // Add the chaos_mode flag
       };
+
+      if (chaosMode) {
+        // Disable the Chaos Mode checkbox if it was used
+        setChaosMode(false);
+        setChaosModeUsed(true);
+      }
 
       const countdownInterval = setInterval(() => {
         setCountdownTime((prevTime) => prevTime - 1);
@@ -95,24 +128,24 @@ function App() {
       const timer = setTimeout(async () => {
         clearInterval(countdownInterval);
         setCountdownTime(2);
-        console.log("submitting request")
-        setSubmittedChoice(true)
-        const lambdaResponse = await invokeLambdaFunction('dream_test', payload);
-        const payloadObject = JSON.parse(lambdaResponse['Payload']);
-
-        setPayloadHolder(payloadObject)
-        console.log(payloadObject)
-        const returned_story = payloadObject['story']['returned_messages'].slice(-1)[0].content;
-        const returned_choices = payloadObject['story']['returned_options'];
-        console.log(returned_choices)
-        setTheEnd(payloadObject['story']['returned_end_flag'])
+        console.log("submitting request");
+        setSubmittedChoice(true);
+        const lambdaResponse = await invokeLambdaFunction("dream_test", payload);
+        const payloadObject = JSON.parse(lambdaResponse["Payload"]);
+        const chaos_marker = payloadObject["chaos_marker"];
+        setChaosMarker(chaos_marker);
+        setPayloadHolder(payloadObject);
+        console.log(payloadObject);
+        const returned_story = payloadObject["story"]["returned_messages"].slice(-1)[0].content;
+        const returned_choices = payloadObject["story"]["returned_options"];
+        console.log(returned_choices);
+        setTheEnd(payloadObject["story"]["returned_end_flag"]);
         setStory(returned_story);
         setChoices(returned_choices);
         setIsLoading(false);
         setIsCooldown(false);
-        setSubmittedChoice(false)
+        setSubmittedChoice(false);
       }, countdownTime * 1000);
-
 
       return () => {
         clearTimeout(timer);
@@ -124,19 +157,30 @@ function App() {
 
 
   return (
+    <div
+    style={{
+      backgroundImage: `url(${backgroundImage})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      width: "100%",
+      minHeight: "100vh",
+      overflow: "auto",
+    }}
+  >
     <>
+    
       <Container fluid className="min-vh-100 d-flex justify-content-center align-items-center">
         <Stack gap={3} className="text-center d-flex justify-content-center">
           {isLoading ? (
             <>
               <div className="text-center mx-auto">
-                <img src={mj} alt="MJ" style={{ width: 250, height: 250 }} />
+                <img src={randomImage} alt="MJ" style={{ width: 250, height: 250 }} />
               </div>
               <div>Loading, please wait...</div>
             </>
           ) : submitted ? (<>
             <div><img src={image.url} alt={'returned'} style={{ width: 768, height: 384 }} /></div>
-            <div><p>{story}</p></div></>
+            <div style = {{backgroundColor: "rgba(255, 255, 255, 0.8)"}}><p>{story}</p></div></>
           ) : (<>
 
             <Form onSubmit={handleFormSubmit}>
@@ -206,6 +250,7 @@ function App() {
               {Object.entries(choices).map(([choiceText, imageUrl], index) => (
                 <div key={index} style={{
                   display: "flex",
+                  backgroundColor: "rgba(255, 255, 255, 0.8)",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
@@ -233,10 +278,23 @@ function App() {
                           : "Submit"
                       }
                     </Button>
+
                   </div>
+
                 </div>
 
               ))}
+                  {!chaosModeUsed && (
+                <div>
+                  <label htmlFor="chaosMode">Engage Chaos Mode</label>
+                  <input
+                    type="checkbox"
+                    id="chaosMode"
+                    name="chaosMode"
+                    onChange={handleChaosModeChange}
+                  />
+                </div>
+              )}
             </div>
           )}
 
@@ -270,6 +328,9 @@ function App() {
               re-enter your prompt
             </div>
             <div>
+              I am currently trying to introduce more variables to the prompt with chaos mode - GPT may not respond with proper formatting.
+            </div>
+            <div>
               The story that is generated can be unpredictable, use at your own risk.
             </div>
             <div>
@@ -278,7 +339,7 @@ function App() {
           </div>
         )}
       </Container>
-    </>)
+    </></div>)
 }
 
 export default App;

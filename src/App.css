@@ -37,3 +37,8 @@
   }
 }
 
+.text-container {
+  background-color: rgba(255, 255, 255, 0.8); /* White background with 80% opacity */
+  padding: 1rem; /* Add some padding around the text */
+  border-radius: 4px; /* Optional: Add rounded corners to the container */
+}
