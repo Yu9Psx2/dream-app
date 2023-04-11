@@ -51,9 +51,9 @@ function App() {
 
   useEffect(() => {
     if (chaosMarker === " introduce a sharknado into the story") {
-      setBackgroundImage("https://picturebucket133234-dev.s3.amazonaws.com/shark.jpg");
+      setBackgroundImage("https://picturebucket133234-dev.s3.amazonaws.com/shark.png");
     } else if (chaosMarker === " introduce a bear into the story") {
-      setBackgroundImage("https://picturebucket133234-dev.s3.amazonaws.com/bear.jpg");
+      setBackgroundImage("https://picturebucket133234-dev.s3.amazonaws.com/bear.png");
     } else if (chaosMarker === " have the protagonists find gold in the story") {
       setBackgroundImage("https://picturebucket133234-dev.s3.amazonaws.com/gold.jpg");
     } else {
